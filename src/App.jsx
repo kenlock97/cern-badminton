@@ -110,7 +110,7 @@ export default function App() {
   const [bookings, setBookings] = useState(INITIAL_BOOKINGS);
 
   // Google Sheets Backend Integration State
-  const [googleScriptUrl, setGoogleScriptUrl] = useState('https://script.google.com/macros/s/AKfycbzNTIken2tO440ZBhAucR3awVPEv1o838LnhZ2_ZFcSGxc7gPvs97v4OBcOz-lC5MF9/exec');
+  const [googleScriptUrl, setGoogleScriptUrl] = useState('https://script.google.com/macros/s/AKfycbyIbCMGxzwPbmkWDIVy3A0oyHvB40CjZMGNIn1dT83HqDk3D3C5ohxgHNd9bsaghGn_/exec');
   const [isSyncing, setIsSyncing] = useState(false);
   const [showBackendModal, setShowBackendModal] = useState(false);
 
