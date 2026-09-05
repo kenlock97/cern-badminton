@@ -533,12 +533,12 @@ export default function App() {
     showToast('🎉 Court successfully booked & split bill calculated!');
   };
 
-  // Remove booking record
+  // Remove booking record (🌟 核心修正：明確傳送 DELETE_BOOKING 與 bookingId)
   const handleDeleteBooking = (id) => {
     const nextBookings = bookings.filter(b => b.id !== id);
     setBookings(nextBookings);
-    syncToBackend({ action: 'SAVE_BOOKINGS', bookings: nextBookings });
-    showToast('Booking removed');
+    syncToBackend({ action: 'DELETE_BOOKING', bookingId: id, bookings: nextBookings });
+    showToast('🗑️ Court booking removed.');
   };
 
   // Generate WhatsApp summary text for court booking
