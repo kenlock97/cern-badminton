@@ -127,23 +127,23 @@ export default function App() {
   const [isDirectBookingModalOpen, setIsDirectBookingModalOpen] = useState(false);
   const [weekToDelete, setWeekToDelete] = useState(null);
 
-  // Direct Booking Form State (Safely initialized without undefined entries)
+  // Direct Booking Form State (Default Court Fee = $8, Shuttlecock Fee = $0)
   const [directBookingForm, setDirectBookingForm] = useState({
     dayId: 'wed',
     slotLabel: '8:00 PM - 10:00 PM',
     courtNo: 'Court 1',
-    totalCost: 140,
-    shuttleCost: 20,
+    totalCost: 8,
+    shuttleCost: 0,
     paymentInfo: 'Wise: 12345678 (Ken Lo)',
     notes: 'Non-marking shoes required. Please be on time!',
     confirmedPlayers: [DEFAULT_MEMBERS[0] || 'Ken Lo']
   });
 
-  // Slot-initiated booking Form State
+  // Slot-initiated booking Form State (Default Court Fee = $8, Shuttlecock Fee = $0)
   const [bookingForm, setBookingForm] = useState({
     courtNo: 'Court 1',
-    totalCost: 140,
-    shuttleCost: 20,
+    totalCost: 8,
+    shuttleCost: 0,
     paymentInfo: 'Wise: 12345678 (Ken Lo)',
     notes: '',
     confirmedPlayers: []
@@ -453,8 +453,8 @@ export default function App() {
     const initialPlayers = slot.members.length > 0 ? [...slot.members] : [selectedUser];
     setBookingForm({
       courtNo: 'Court 1',
-      totalCost: 140,
-      shuttleCost: 20,
+      totalCost: 8,
+      shuttleCost: 0,
       paymentInfo: `Wise: 12345678 (${selectedUser})`,
       notes: 'Non-marking shoes required. Please be on time!',
       confirmedPlayers: initialPlayers
@@ -1174,8 +1174,8 @@ See everyone on the court! 🔥`;
                         dayId: 'wed',
                         slotLabel: '8:00 PM - 10:00 PM',
                         courtNo: 'Court 1',
-                        totalCost: 140,
-                        shuttleCost: 20,
+                        totalCost: 8,
+                        shuttleCost: 0,
                         paymentInfo: `Wise: 12345678 (${selectedUser})`,
                         notes: 'Please bring indoor court shoes.',
                         confirmedPlayers: [selectedUser]
@@ -1682,7 +1682,7 @@ See everyone on the court! 🔥`;
                 </div>
               </div>
 
-              {/* Cost Inputs */}
+              {/* Cost Inputs (Default Court: $8, Shuttlecock: $0) */}
               <div className="grid grid-cols-2 gap-2.5 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
                 <div>
                   <label className="block text-slate-300 font-medium mb-1">Court Fee ($)</label>
@@ -1836,7 +1836,7 @@ See everyone on the court! 🔥`;
                 </div>
               </div>
 
-              {/* Cost Inputs */}
+              {/* Cost Inputs (Default Court: $8, Shuttlecock: $0) */}
               <div className="grid grid-cols-2 gap-2.5 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
                 <div>
                   <label className="block text-slate-300 font-medium mb-1">Court Fee ($)</label>
