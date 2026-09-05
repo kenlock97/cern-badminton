@@ -27,7 +27,7 @@ const TIME_SLOTS = [
 ];
 
 // Default members list
-const DEFAULT_MEMBERS = ['Alan (Captain)', 'Kelvin', 'Wing', 'Chris', 'Sarah', 'Jason', 'Chloe', 'Sam'];
+const DEFAULT_MEMBERS = [];
 
 // Helper to format short date string "Sep 7"
 const formatShortDate = (date) => {
@@ -75,48 +75,10 @@ const INITIAL_WEEKS = [
 ];
 
 // Initial multi-week sample availability
-const INITIAL_AVAILABILITY = {
-  [INITIAL_WEEKS[0].id]: {
-    'Alan (Captain)': ['mon_20_21', 'mon_21_22', 'wed_20_21', 'wed_21_22', 'fri_20_21', 'fri_21_22'],
-    'Kelvin': ['mon_19_20', 'mon_20_21', 'wed_20_21', 'wed_21_22', 'fri_20_21'],
-    'Wing': ['tue_20_21', 'wed_20_21', 'wed_21_22', 'fri_20_21'],
-    'Chris': ['mon_20_21', 'wed_20_21', 'wed_21_22', 'fri_19_20', 'fri_20_21', 'fri_21_22'],
-    'Sarah': ['mon_19_20', 'mon_20_21', 'fri_20_21', 'fri_21_22'],
-    'Jason': ['wed_19_20', 'wed_20_21', 'wed_21_22'],
-    'Chloe': ['mon_20_21', 'wed_20_21', 'fri_20_21'],
-    'Sam': ['fri_19_20', 'fri_20_21', 'fri_21_22']
-  },
-  [INITIAL_WEEKS[1].id]: {
-    'Alan (Captain)': ['tue_20_21', 'thu_20_21', 'fri_20_21', 'fri_21_22'],
-    'Kelvin': ['tue_20_21', 'thu_20_21', 'fri_20_21', 'fri_21_22'],
-    'Wing': ['tue_20_21', 'thu_20_21', 'fri_20_21'],
-    'Chris': ['tue_20_21', 'thu_20_21', 'fri_20_21', 'fri_21_22'],
-  },
-  [INITIAL_WEEKS[2].id]: {
-    'Alan (Captain)': ['wed_20_21', 'wed_21_22'],
-    'Wing': ['wed_20_21', 'wed_21_22'],
-  },
-  [INITIAL_WEEKS[3].id]: {}
-};
+const INITIAL_AVAILABILITY = {};
 
 // Initial Confirmed Bookings
-const INITIAL_BOOKINGS = [
-  {
-    id: 'book-1',
-    weekId: INITIAL_WEEKS[0].id,
-    dayId: 'wed',
-    dayLabel: 'Wednesday (Sep 9)',
-    slotLabel: '8:00 PM - 10:00 PM (2-Hour Block)',
-    venue: FIXED_VENUE,
-    courtNo: 'Court 3',
-    totalCost: 140,
-    shuttleCost: 20,
-    booker: 'Alan (Captain)',
-    paymentInfo: 'Wise: 12345678 (Alan C.) / TWINT: 0791234567',
-    confirmedPlayers: ['Alan (Captain)', 'Kelvin', 'Wing', 'Chris', 'Jason', 'Chloe'],
-    notes: 'Please bring non-marking indoor shoes and arrive 10 mins early!'
-  }
-];
+const INITIAL_BOOKINGS = [];
 
 export default function App() {
   const [weeks, setWeeks] = useState(INITIAL_WEEKS);
@@ -126,7 +88,7 @@ export default function App() {
   const [weekTab, setWeekTab] = useState('vote'); // 'vote' | 'summary' | 'booked'
 
   const [members, setMembers] = useState(DEFAULT_MEMBERS);
-  const [selectedUser, setSelectedUser] = useState('Alan (Captain)');
+  const [selectedUser, setSelectedUser] = useState('Paulina');
   const [availability, setAvailability] = useState(INITIAL_AVAILABILITY);
   const [bookings, setBookings] = useState(INITIAL_BOOKINGS);
 
@@ -218,7 +180,12 @@ export default function App() {
     try {
       const res = await fetch(googleScriptUrl);
       const data = await res.json();
-      if (data.members && Array.isArray(data.members)) setMembers(data.members);
+      if (data.members && Array.isArray(data.members)) {
+        setMembers(data.members);
+        if (!selectedUser || !data.members.includes(selectedUser)) {
+          setSelectedUser(data.members[0] || '');
+        }
+      }
       if (data.availability) setAvailability(data.availability);
       if (data.bookings && Array.isArray(data.bookings)) setBookings(data.bookings);
       showToast('✅ Loaded latest data from Google Sheet!');
