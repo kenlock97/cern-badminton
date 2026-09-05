@@ -26,8 +26,25 @@ const TIME_SLOTS = [
   { id: '21_22', label: '9:00 PM - 10:00 PM', short: '9-10 PM', hours: 1 },
 ];
 
-// Default members list
-const DEFAULT_MEMBERS = [];
+// CERN Official Roster (16 Active Members as default to eliminate ghost/fake users)
+const DEFAULT_MEMBERS = [
+  "Ken Lo",
+  "Milena",
+  "Terry",
+  "Acelya Deniz Gungordu",
+  "ayman",
+  "beria can",
+  "Chen Hua (Ken)",
+  "Derin John",
+  "Gregor kersevan",
+  "Harshit",
+  "James Souter",
+  "Matthieu L.",
+  "Octavio Pacheco",
+  "Paulina",
+  "Yu Wei Kao",
+  "Zuleyha Kocak"
+];
 
 // Helper to format short date string "Sep 7"
 const formatShortDate = (date) => {
@@ -77,7 +94,7 @@ const INITIAL_WEEKS = [
 // Initial multi-week sample availability
 const INITIAL_AVAILABILITY = {};
 
-// Initial Confirmed Bookings
+// Clean initial bookings without fake samples
 const INITIAL_BOOKINGS = [];
 
 export default function App() {
@@ -88,7 +105,7 @@ export default function App() {
   const [weekTab, setWeekTab] = useState('vote'); // 'vote' | 'summary' | 'booked'
 
   const [members, setMembers] = useState(DEFAULT_MEMBERS);
-  const [selectedUser, setSelectedUser] = useState('Paulina');
+  const [selectedUser, setSelectedUser] = useState(DEFAULT_MEMBERS[0] || 'Ken Lo');
   const [availability, setAvailability] = useState(INITIAL_AVAILABILITY);
   const [bookings, setBookings] = useState(INITIAL_BOOKINGS);
 
@@ -110,16 +127,16 @@ export default function App() {
   const [isDirectBookingModalOpen, setIsDirectBookingModalOpen] = useState(false);
   const [weekToDelete, setWeekToDelete] = useState(null);
 
-  // Direct Booking Form State
+  // Direct Booking Form State (Safely initialized without undefined entries)
   const [directBookingForm, setDirectBookingForm] = useState({
     dayId: 'wed',
     slotLabel: '8:00 PM - 10:00 PM',
     courtNo: 'Court 1',
     totalCost: 140,
     shuttleCost: 20,
-    paymentInfo: 'Wise: 12345678 (Alan)',
+    paymentInfo: 'Wise: 12345678 (Ken Lo)',
     notes: 'Non-marking shoes required. Please be on time!',
-    confirmedPlayers: [DEFAULT_MEMBERS[0], DEFAULT_MEMBERS[1], DEFAULT_MEMBERS[2], DEFAULT_MEMBERS[3]]
+    confirmedPlayers: [DEFAULT_MEMBERS[0] || 'Ken Lo']
   });
 
   // Slot-initiated booking Form State
@@ -127,7 +144,7 @@ export default function App() {
     courtNo: 'Court 1',
     totalCost: 140,
     shuttleCost: 20,
-    paymentInfo: 'Wise: 12345678 (Alan)',
+    paymentInfo: 'Wise: 12345678 (Ken Lo)',
     notes: '',
     confirmedPlayers: []
   });
@@ -173,21 +190,36 @@ export default function App() {
     }
   };
 
-  // Fetch initial data from Google Sheet
+  // Fetch initial data from Google Sheet with ghost filtering
   const fetchFromBackend = async () => {
     if (!googleScriptUrl) return;
     setIsSyncing(true);
     try {
       const res = await fetch(googleScriptUrl);
       const data = await res.json();
-      if (data.members && Array.isArray(data.members)) {
-        setMembers(data.members);
-        if (!selectedUser || !data.members.includes(selectedUser)) {
-          setSelectedUser(data.members[0] || '');
-        }
+      
+      if (data.members && Array.isArray(data.members) && data.members.length > 0) {
+        // Filter out empty or ghost strings
+        const validMembers = data.members.filter(m => typeof m === 'string' && m.trim().length > 0);
+        setMembers(validMembers);
+        
+        // Ensure selectedUser exists in valid roster
+        setSelectedUser(prev => {
+          if (validMembers.includes(prev)) return prev;
+          return validMembers[0] || 'Ken Lo';
+        });
       }
-      if (data.availability) setAvailability(data.availability);
-      if (data.bookings && Array.isArray(data.bookings)) setBookings(data.bookings);
+      
+      if (data.availability) {
+        setAvailability(data.availability);
+      }
+      
+      if (data.bookings && Array.isArray(data.bookings)) {
+        // Filter out corrupted or empty bookings
+        const validBookings = data.bookings.filter(b => b && b.id);
+        setBookings(validBookings);
+      }
+      
       showToast('✅ Loaded latest data from Google Sheet!');
       setShowBackendModal(false);
     } catch (err) {
@@ -198,6 +230,7 @@ export default function App() {
     }
   };
 
+  // Auto-fetch from Google Sheet on page load or script URL change
   useEffect(() => {
     if (googleScriptUrl) {
       fetchFromBackend();
@@ -209,7 +242,7 @@ export default function App() {
   const currentUserSlots = currentWeekAvail[selectedUser] || [];
   const hasUserVotedThisWeek = currentUserSlots.length > 0;
 
-  // Retrieve players available for a specific timeslot
+  // Retrieve players available for a specific timeslot (cleanly filtered against valid roster)
   const getSlotMembers = (weekId, dayId, slotId) => {
     const weekData = availability[weekId] || {};
     const key = `${dayId}_${slotId}`;
@@ -441,6 +474,8 @@ export default function App() {
     const dayIndex = DAYS.findIndex(d => d.id === directBookingForm.dayId);
     const dateLabel = currentWeek.dates[dayIndex] || matchedDay?.label || 'Selected Day';
 
+    const cleanPlayers = directBookingForm.confirmedPlayers.filter(Boolean);
+
     const newBooking = {
       id: 'book-' + Date.now(),
       weekId: selectedWeekId,
@@ -453,7 +488,7 @@ export default function App() {
       shuttleCost: Number(directBookingForm.shuttleCost) || 0,
       booker: selectedUser,
       paymentInfo: directBookingForm.paymentInfo,
-      confirmedPlayers: directBookingForm.confirmedPlayers.length > 0 ? directBookingForm.confirmedPlayers : [selectedUser],
+      confirmedPlayers: cleanPlayers.length > 0 ? cleanPlayers : [selectedUser],
       notes: directBookingForm.notes
     };
 
@@ -472,6 +507,8 @@ export default function App() {
       return;
     }
 
+    const cleanPlayers = bookingForm.confirmedPlayers.filter(Boolean);
+
     const newBooking = {
       id: 'book-' + Date.now(),
       weekId: selectedWeekId,
@@ -484,7 +521,7 @@ export default function App() {
       shuttleCost: Number(bookingForm.shuttleCost) || 0,
       booker: selectedUser,
       paymentInfo: bookingForm.paymentInfo,
-      confirmedPlayers: bookingForm.confirmedPlayers.length > 0 ? bookingForm.confirmedPlayers : [selectedUser],
+      confirmedPlayers: cleanPlayers.length > 0 ? cleanPlayers : [selectedUser],
       notes: bookingForm.notes
     };
 
