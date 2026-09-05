@@ -231,6 +231,12 @@ export default function App() {
     }
   };
 
+  useEffect(() => {
+    if (googleScriptUrl) {
+      fetchFromBackend();
+    }
+  }, [googleScriptUrl]);
+
   const currentWeek = weeks.find(w => w.id === selectedWeekId) || weeks[0];
   const currentWeekAvail = availability[selectedWeekId] || {};
   const currentUserSlots = currentWeekAvail[selectedUser] || [];
